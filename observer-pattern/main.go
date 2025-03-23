@@ -1,60 +1,24 @@
 package main
 
-import "fmt"
-
-type Observer interface {
-	ReceiveNotify(j Job)
-}
-
-type Developer struct{}
-
-func (Developer) ReceiveNotify(j Job) { fmt.Println("Many thanks, I've received job:", j.Title) }
-
-type Job struct {
-	Title string
-}
-
-
-type ITJobsCompany struct {
-	jobs      []Job
-	observers []Observer
-}
-
-func (comp *ITJobsCompany) AddObserver(o Observer) {
-	comp.observers = append(comp.observers, o)
-}
-
-func (comp *ITJobsCompany) RemoveObserver(o Observer) {
-	for i := range comp.observers {
-		if comp.observers[i] == o {
-			comp.observers = append(comp.observers[:i], comp.observers[i+1:]...)
-			return
-		}
-	}
-}
-
-func (comp *ITJobsCompany) notifyToObservers(j Job) {
-	for i := range comp.observers {
-		comp.observers[i].ReceiveNotify(j)
-	}
-}
-
-func (comp *ITJobsCompany) AddNewJob(j Job) {
-	comp.jobs = append(comp.jobs, j)
-
-	comp.notifyToObservers(j)
-}
+import (
+	"fmt"
+)
 
 func main() {
-	itComp := ITJobsCompany{}
-	developer := Developer{}
+	weatherStation := NewWeatherStation()
 
-	itComp.AddObserver(developer)
+	display1 := NewTemperatureDisplay("Phòng khách")
+	display2 := NewTemperatureDisplay("Văn phòng")
+	phoneApp := NewPhoneApp("NguyenVanA")
 
-	itComp.AddNewJob(Job{Title: "Senior Go backend engineer"})
-	itComp.AddNewJob(Job{Title: "Junior React developer"})
+	weatherStation.RegisterObserver(display1)
+	weatherStation.RegisterObserver(display2)
+	weatherStation.RegisterObserver(phoneApp)
 
-	itComp.RemoveObserver(developer)
+	weatherStation.SetTemperature(25.5)
 
-	itComp.AddNewJob(Job{Title: "Some boring IT job"})
+	fmt.Println("\n--- Sau khi gỡ bỏ màn hình văn phòng ---")
+	weatherStation.RemoveObserver(display2)
+
+	weatherStation.SetTemperature(26.8)
 }
